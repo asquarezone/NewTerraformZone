@@ -51,3 +51,63 @@ resource "aws_subnet" "db" {
   depends_on = [aws_vpc.base]
 
 }
+
+
+resource "aws_internet_gateway" "base" {
+  vpc_id = aws_vpc.base.id
+  tags = {
+    Name = "from-tf"
+    Env  = "Dev"
+  }
+  depends_on = [aws_vpc.base]
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.base.id
+
+  tags = {
+    Name = "private"
+    Env  = "Dev"
+  }
+
+  depends_on = [aws_subnet.db, aws_subnet.app]
+
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.base.id
+
+  tags = {
+    Name = "public"
+    Env  = "Dev"
+  }
+
+  depends_on = [aws_internet_gateway.base, aws_subnet.web]
+
+}
+
+
+resource "aws_route" "internet" {
+  route_table_id         = aws_route_table.public.id
+  gateway_id             = aws_internet_gateway.base.id
+  destination_cidr_block = "0.0.0.0/0"
+  depends_on             = [aws_internet_gateway.base, aws_route_table.public]
+
+}
+
+
+resource "aws_route_table_association" "public" {
+  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.web.id
+}
+
+
+resource "aws_route_table_association" "private_app" {
+  route_table_id = aws_route_table.private.id
+  subnet_id      = aws_subnet.app.id
+}
+
+resource "aws_route_table_association" "private_db" {
+  route_table_id = aws_route_table.private.id
+  subnet_id      = aws_subnet.db.id
+}
