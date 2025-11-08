@@ -1,51 +1,93 @@
-variable "vpc_cidr" {
-    type = string
-    description = "vpc cidr"
-    default = "192.168.0.0/16"
+variable "vpc_info" {
+  type = object({
+    cidr                 = string
+    tags                 = map(string)
+    enable_dns_hostnames = bool
+  })
+  description = "vpc information"
+  default = {
+    cidr = "192.168.0.0/16"
+    tags = {
+      Name = "from-tf"
+      Env  = "Dev"
+    }
+    enable_dns_hostnames = true
+  }
+
+}
+
+
+variable "region" {
+  type    = string
+  default = "ap-south-1"
+
 }
 
 # -------------------
 # Web Subnet Variables
 # -------------------
 
-variable "web_subnet_cidr" {
-    type = string
-    description = "web subnet cidr"
-    default = "192.168.0.0/24"
-}
+variable "web_subnet_info" {
+  type = object({
+    cidr = string
+    az   = string
+    tags = map(string)
+  })
+  default = {
+    az   = "ap-south-1a"
+    cidr = "192.168.0.0/24"
+    tags = {
+      Name = "web"
+      Env  = "Dev"
+    }
+  }
+  description = "web subnet information"
 
-variable "web_subnet_az" {
-    type = string
-    description = "web subnet az"
-    default = "ap-south-1a"
 }
 
 # -------------------
 # App Subnet Variables
 # -------------------
-variable "app_subnet_cidr" {
-  type        = string
-  description = "App subnet CIDR block"
-  default     = "192.168.1.0/24"
+
+variable "app_subnet_info" {
+  type = object({
+    cidr = string
+    az   = string
+    tags = map(string)
+  })
+  default = {
+    az   = "ap-south-1a"
+    cidr = "192.168.1.0/24"
+    tags = {
+      Name = "app"
+      Env  = "Dev"
+    }
+  }
+  description = "app subnet information"
+
 }
 
-variable "app_subnet_az" {
-  type        = string
-  description = "App subnet Availability Zone"
-  default     = "ap-south-1b"
-}
+
 
 # -------------------
 # DB Subnet Variables
 # -------------------
-variable "db_subnet_cidr" {
-  type        = string
-  description = "DB subnet CIDR block"
-  default     = "192.168.2.0/24"
+
+variable "db_subnet_info" {
+  type = object({
+    cidr = string
+    az   = string
+    tags = map(string)
+  })
+  default = {
+    az   = "ap-south-1a"
+    cidr = "192.168.2.0/24"
+    tags = {
+      Name = "db"
+      Env  = "Dev"
+    }
+  }
+  description = "db subnet information"
+
 }
 
-variable "db_subnet_az" {
-  type        = string
-  description = "DB subnet Availability Zone"
-  default     = "ap-south-1c"
-}
