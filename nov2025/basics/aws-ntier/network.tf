@@ -7,34 +7,23 @@ resource "aws_vpc" "base" {
 
 }
 
-
-resource "aws_subnet" "web" {
-  vpc_id            = aws_vpc.base.id # implicit dependency
-  availability_zone = var.web_subnet_info.az
-  cidr_block        = var.web_subnet_info.cidr
-  tags              = var.web_subnet_info.tags
+resource "aws_subnet" "public" {
+  count             = length(var.public_subnets)
+  vpc_id            = aws_vpc.base.id
+  availability_zone = var.public_subnets[count.index].az
+  cidr_block        = var.public_subnets[count.index].cidr
+  tags              = var.public_subnets[count.index].tags
   # explicit dependency
   depends_on = [aws_vpc.base]
 
 }
 
-
-resource "aws_subnet" "app" {
-  vpc_id            = aws_vpc.base.id # implicit dependency
-  availability_zone = var.app_subnet_info.az
-  cidr_block        = var.app_subnet_info.cidr
-  tags              = var.app_subnet_info.tags
-  # explicit dependency
-  depends_on = [aws_vpc.base]
-
-}
-
-
-resource "aws_subnet" "db" {
-  vpc_id            = aws_vpc.base.id # implicit dependency
-  availability_zone = var.db_subnet_info.az
-  cidr_block        = var.db_subnet_info.cidr
-  tags              = var.db_subnet_info.tags
+resource "aws_subnet" "private" {
+  count             = length(var.private_subnets)
+  vpc_id            = aws_vpc.base.id
+  availability_zone = var.private_subnets[count.index].az
+  cidr_block        = var.private_subnets[count.index].cidr
+  tags              = var.private_subnets[count.index].tags
   # explicit dependency
   depends_on = [aws_vpc.base]
 
@@ -58,7 +47,7 @@ resource "aws_route_table" "private" {
     Env  = "Dev"
   }
 
-  depends_on = [aws_subnet.db, aws_subnet.app]
+  depends_on = [aws_subnet.private]
 
 }
 
@@ -70,7 +59,7 @@ resource "aws_route_table" "public" {
     Env  = "Dev"
   }
 
-  depends_on = [aws_internet_gateway.base, aws_subnet.web]
+  depends_on = [aws_internet_gateway.base, aws_subnet.public]
 
 }
 
@@ -85,17 +74,15 @@ resource "aws_route" "internet" {
 
 
 resource "aws_route_table_association" "public" {
+  count          = length(var.public_subnets)
   route_table_id = aws_route_table.public.id
-  subnet_id      = aws_subnet.web.id
+  subnet_id      = aws_subnet.public[count.index].id
 }
 
 
-resource "aws_route_table_association" "private_app" {
+resource "aws_route_table_association" "private" {
+  count          = length(var.private_subnets)
   route_table_id = aws_route_table.private.id
-  subnet_id      = aws_subnet.app.id
+  subnet_id      = aws_subnet.private[count.index].id
 }
 
-resource "aws_route_table_association" "private_db" {
-  route_table_id = aws_route_table.private.id
-  subnet_id      = aws_subnet.db.id
-}

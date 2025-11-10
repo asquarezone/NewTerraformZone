@@ -12,7 +12,14 @@ public_subnets = [{
   az   = "ap-south-1a"
   cidr = "10.10.0.0/24"
   tags = {
-    Name = "web"
+    Name = "web-1"
+    Env  = "dev"
+  }
+  }, {
+  az   = "ap-south-1b"
+  cidr = "10.10.3.0/24"
+  tags = {
+    Name = "web-2"
     Env  = "dev"
   }
 }]
@@ -21,14 +28,28 @@ private_subnets = [{
   az   = "ap-south-1a"
   cidr = "10.10.1.0/24"
   tags = {
-    Name = "app"
+    Name = "app-1"
     Env  = "dev"
   }
   }, {
   az   = "ap-south-1a"
   cidr = "10.10.2.0/24"
   tags = {
-    Name = "db"
+    Name = "db-1"
+    Env  = "dev"
+  }
+  }, {
+  az   = "ap-south-1b"
+  cidr = "10.10.4.0/24"
+  tags = {
+    Name = "app-2"
+    Env  = "dev"
+  }
+  }, {
+  az   = "ap-south-1b"
+  cidr = "10.10.5.0/24"
+  tags = {
+    Name = "db-2"
     Env  = "dev"
   }
 }]
