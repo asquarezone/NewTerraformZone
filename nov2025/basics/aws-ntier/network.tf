@@ -4,6 +4,9 @@ resource "aws_vpc" "base" {
   cidr_block           = var.vpc_info.cidr
   enable_dns_hostnames = var.vpc_info.enable_dns_hostnames
   tags                 = var.vpc_info.tags
+  lifecycle {
+    create_before_destroy = true
+  }
 
 }
 
@@ -13,6 +16,11 @@ resource "aws_subnet" "public" {
   availability_zone = var.public_subnets[count.index].az
   cidr_block        = var.public_subnets[count.index].cidr
   tags              = var.public_subnets[count.index].tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
   # explicit dependency
   depends_on = [aws_vpc.base]
 
@@ -24,6 +32,11 @@ resource "aws_subnet" "private" {
   availability_zone = var.private_subnets[count.index].az
   cidr_block        = var.private_subnets[count.index].cidr
   tags              = var.private_subnets[count.index].tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
   # explicit dependency
   depends_on = [aws_vpc.base]
 
@@ -36,6 +49,11 @@ resource "aws_internet_gateway" "base" {
     Name = "from-tf"
     Env  = "Dev"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
   depends_on = [aws_vpc.base]
 }
 
@@ -45,6 +63,10 @@ resource "aws_route_table" "private" {
   tags = {
     Name = "private"
     Env  = "Dev"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 
   depends_on = [aws_subnet.private]
@@ -59,6 +81,10 @@ resource "aws_route_table" "public" {
     Env  = "Dev"
   }
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   depends_on = [aws_internet_gateway.base, aws_subnet.public]
 
 }
@@ -68,7 +94,13 @@ resource "aws_route" "internet" {
   route_table_id         = aws_route_table.public.id
   gateway_id             = aws_internet_gateway.base.id
   destination_cidr_block = "0.0.0.0/0"
-  depends_on             = [aws_internet_gateway.base, aws_route_table.public]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [aws_internet_gateway.base, aws_route_table.public]
+
 
 }
 
