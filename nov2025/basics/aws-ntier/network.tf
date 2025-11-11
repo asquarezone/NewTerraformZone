@@ -118,3 +118,27 @@ resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private[count.index].id
 }
 
+# parent
+resource "aws_security_group" "web" {
+  vpc_id = aws_vpc.base.id
+  tags   = var.web_security_group_info.tags
+
+}
+
+# child
+resource "aws_vpc_security_group_ingress_rule" "web_rules" {
+  count             = length(var.web_security_group_info.ingress_rules)
+  security_group_id = aws_security_group.web.id
+  cidr_ipv4         = var.web_security_group_info.ingress_rules[count.index].cidr_ipv4
+  from_port         = var.web_security_group_info.ingress_rules[count.index].from_port
+  ip_protocol       = var.web_security_group_info.ingress_rules[count.index].ip_protocol
+  to_port           = var.web_security_group_info.ingress_rules[count.index].to_port
+}
+
+resource "aws_vpc_security_group_egress_rule" "web_rules" {
+  count             = length(var.web_security_group_info.egress_rules)
+  security_group_id = aws_security_group.web.id
+  cidr_ipv4         = var.web_security_group_info.egress_rules[count.index].cidr_ipv4
+  ip_protocol       = var.web_security_group_info.egress_rules[count.index].ip_protocol
+}
+

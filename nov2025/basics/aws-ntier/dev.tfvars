@@ -53,3 +53,32 @@ private_subnets = [{
     Env  = "dev"
   }
 }]
+
+web_security_group_info = {
+  name = "web"
+  tags = {
+    Name = "web"
+    Env  = "dev"
+  }
+  ingress_rules = [{
+    cidr_ipv4   = "0.0.0.0/0"
+    from_port   = 80
+    ip_protocol = "tcp"
+    to_port     = 80
+    }, {
+    cidr_ipv4   = "0.0.0.0/0"
+    from_port   = 443
+    ip_protocol = "tcp"
+    to_port     = 443
+    }, {
+    cidr_ipv4   = "0.0.0.0/0"
+    from_port   = 22
+    ip_protocol = "tcp"
+    to_port     = 22
+    }
+  ]
+  egress_rules = [{
+    cidr_ipv4   = "0.0.0.0/0"
+    ip_protocol = "-1"
+  }]
+}
