@@ -46,16 +46,16 @@ variable "private_subnets" {
 
 variable "web_security_group_info" {
   type = object({
-    name = string
+    name = optional(string, "websg")
     tags = map(string)
     ingress_rules = list(object({
-      cidr_ipv4   = string
+      cidr_ipv4   = optional(string,"0.0.0.0/0") # if user does not pass cidr_ipv4 use "0.0.0.0/0"
       from_port   = number
       ip_protocol = string
       to_port     = number
     }))
     egress_rules = list(object({
-      cidr_ipv4   = string
+      cidr_ipv4   = optional(string,"0.0.0.0/0") # if user does not pass cidr_ipv4 use "0.0.0.0/0"
       ip_protocol = string
     }))
   })
