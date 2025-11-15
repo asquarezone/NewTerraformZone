@@ -1,0 +1,4 @@
+output "temp" {
+    value = mod
+  
+}
