@@ -48,3 +48,56 @@ module "secondary_vnet" {
   }]
 
 }
+
+
+module "primary_web_nsg" {
+  source              = "./modules/nsg"
+  resource_group_name = azurerm_resource_group.base.name
+  location            = var.primary_location
+  name                = "web_nsg_primary"
+  rules = [{
+    name                   = "openhttp"
+    priority               = 300
+    direction              = "Inbound"
+    source_address_prefix  = "*"
+    source_port_range      = "80"
+    destination_port_range = "80"
+    access                 = "Allow"
+    }, {
+    name                   = "openssh"
+    priority               = 310
+    direction              = "Inbound"
+    source_address_prefix  = "*"
+    source_port_range      = "22"
+    destination_port_range = "22"
+    access                 = "Allow"
+  }]
+  depends_on = [azurerm_resource_group.base]
+
+}
+
+module "secondary_web_nsg" {
+  source              = "./modules/nsg"
+  resource_group_name = azurerm_resource_group.base.name
+  location            = "southindia"
+  name                = "web_nsg_secondary"
+  rules = [{
+    name                   = "openhttp"
+    priority               = 300
+    direction              = "Inbound"
+    source_address_prefix  = "*"
+    source_port_range      = "80"
+    destination_port_range = "80"
+    access                 = "Allow"
+    }, {
+    name                   = "openssh"
+    priority               = 310
+    direction              = "Inbound"
+    source_address_prefix  = "*"
+    source_port_range      = "22"
+    destination_port_range = "22"
+    access                 = "Allow"
+  }]
+  depends_on = [azurerm_resource_group.base]
+
+}

@@ -8,3 +8,4 @@ variable "primary_location" {
   default = "centralindia"
 
 }
+
