@@ -18,3 +18,5 @@ resource "azurerm_subnet" "subnets" {
   depends_on = [azurerm_virtual_network.base]
 
 }
+
+
