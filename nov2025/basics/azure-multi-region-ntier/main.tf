@@ -60,7 +60,7 @@ module "primary_web_nsg" {
     priority               = 300
     direction              = "Inbound"
     source_address_prefix  = "*"
-    source_port_range      = "80"
+    source_port_range      = "*"
     destination_port_range = "80"
     access                 = "Allow"
     }, {
@@ -68,7 +68,7 @@ module "primary_web_nsg" {
     priority               = 310
     direction              = "Inbound"
     source_address_prefix  = "*"
-    source_port_range      = "22"
+    source_port_range      = "*"
     destination_port_range = "22"
     access                 = "Allow"
   }]
@@ -101,3 +101,67 @@ module "secondary_web_nsg" {
   depends_on = [azurerm_resource_group.base]
 
 }
+
+
+# public ip 
+
+resource "azurerm_public_ip" "primary_web" {
+  resource_group_name = azurerm_resource_group.base.name
+  location            = var.primary_location
+  allocation_method   = "Static"
+  name                = "primary_web"
+
+}
+
+# Network interface
+
+resource "azurerm_network_interface" "primary_web" {
+  resource_group_name = azurerm_resource_group.base.name
+  location            = var.primary_location
+  ip_configuration {
+    name                          = "primary"
+    subnet_id                     = module.primary_vnet.subnet_ids[0]
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.primary_web.id
+  }
+  name = "primary_web_nic"
+
+}
+
+
+resource "azurerm_linux_virtual_machine" "primary_web" {
+  name                = "web1"
+  resource_group_name = azurerm_resource_group.base.name
+  location            = var.primary_location
+  size                = "Standard_B1s"
+  admin_username      = "Dell"
+  
+  network_interface_ids = [
+    azurerm_network_interface.primary_web.id,
+  ]
+
+  admin_ssh_key {
+    username   = "Dell"
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "ubuntu-24_04-lts"
+    sku       = "server"
+    version   = "latest"
+  }
+}
+
+
+resource "azurerm_network_interface_security_group_association" "primary" {
+  network_interface_id = azurerm_network_interface.primary_web.id
+  network_security_group_id = module.primary_web_nsg.id
+  
+}
+
