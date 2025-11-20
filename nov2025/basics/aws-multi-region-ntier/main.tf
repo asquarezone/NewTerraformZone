@@ -103,3 +103,142 @@ module "secondary_vpc" {
   }]
 
 }
+
+
+module "primary_web_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "4.0.0" # use an appropriate version
+
+  name        = "my-security-group"
+  description = "Allow SSH and HTTP inbound"
+  vpc_id      = module.primary_vpc.vpc_id # pass your VPC ID here
+
+  # Ingress CIDR blocks for SSH and HTTP
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+
+  # Use predefined named rules
+  ingress_rules = [
+    "ssh-tcp",    # port 22
+    "http-80-tcp" # port 80
+  ]
+
+  # Allow all outbound
+  egress_rules = ["all-all"]
+
+  tags = {
+    Terraform = "true"
+    Name      = "Web"
+  }
+  providers = {
+    aws = aws.primary
+  }
+}
+
+module "secondary_web_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "4.0.0" # use an appropriate version
+
+  name        = "my-security-group"
+  description = "Allow SSH and HTTP inbound"
+  vpc_id      = module.secondary_vpc.vpc_id # pass your VPC ID here
+
+  # Ingress CIDR blocks for SSH and HTTP
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+
+  # Use predefined named rules
+  ingress_rules = [
+    "ssh-tcp",    # port 22
+    "http-80-tcp" # port 80
+  ]
+
+  # Allow all outbound
+  egress_rules = ["all-all"]
+
+  tags = {
+    Terraform = "true"
+    Name      = "Web"
+  }
+  providers = {
+    aws = aws.secondary
+  }
+}
+
+
+
+# import a key pair
+
+resource "aws_key_pair" "primary" {
+  region     = "us-west-2"
+  public_key = file(var.key_path)
+  provider   = aws.primary
+  key_name   = "primary"
+}
+
+resource "aws_key_pair" "secondary" {
+  region     = "us-east-1"
+  public_key = file(var.key_path)
+  provider   = aws.primary
+  key_name   = "secondary"
+}
+
+data "aws_ami" "ubuntu_primary" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+  provider = aws.primary
+}
+
+
+module "primary_web" {
+  source = "./modules/ec2"
+  ami_id = data.aws_ami.ubuntu_primary.id
+  instance_type = "t3.micro"
+  security_group_id = module.primary_web_sg.security_group_id
+  key_name = aws_key_pair.primary.key_name
+  subnet_id = module.primary_vpc.public_subnet_ids[0]
+  providers = {
+    aws = aws.primary
+  }
+  
+}
+
+data "aws_ami" "ubuntu_secondary" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+  provider = aws.secondary
+}
+
+
+module "secondary_web" {
+  source = "./modules/ec2"
+  ami_id = data.aws_ami.ubuntu_secondary.id
+  instance_type = "t3.micro"
+  security_group_id = module.secondary_web_sg.security_group_id
+  key_name = aws_key_pair.secondary.key_name
+  subnet_id = module.secondary_vpc.public_subnet_ids[0]
+  providers = {
+    aws = aws.secondary
+  }
+  
+}
