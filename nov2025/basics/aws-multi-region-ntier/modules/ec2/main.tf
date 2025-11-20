@@ -6,6 +6,17 @@ resource "aws_instance" "base" {
   vpc_security_group_ids      = [var.security_group_id]
   key_name                    = var.key_name
 
-  user_data = var.user_data
-
+  provisioner "remote-exec" {
+    connection {
+      host = aws_instance.base.public_ip
+      user = "ubuntu"
+      private_key = file("~/.ssh/id_ed25519")
+    }
+    inline = [
+      "sudo apt update",
+      "sudo apt install apache2 -y",
+      "sudo apt install tree -y"
+    ]
+    
+  }
 }
