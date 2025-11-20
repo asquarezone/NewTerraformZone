@@ -194,22 +194,23 @@ data "aws_ami" "ubuntu_primary" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"] # Canonical
+  owners   = ["099720109477"] # Canonical
   provider = aws.primary
 }
 
 
 module "primary_web" {
-  source = "./modules/ec2"
-  ami_id = data.aws_ami.ubuntu_primary.id
-  instance_type = "t3.micro"
+  source            = "./modules/ec2"
+  ami_id            = data.aws_ami.ubuntu_primary.id
+  instance_type     = "t3.micro"
   security_group_id = module.primary_web_sg.security_group_id
-  key_name = aws_key_pair.primary.key_name
-  subnet_id = module.primary_vpc.public_subnet_ids[0]
+  key_name          = aws_key_pair.primary.key_name
+  subnet_id         = module.primary_vpc.public_subnet_ids[0]
+  user_data         = file("./cloud_init.sh")
   providers = {
     aws = aws.primary
   }
-  
+
 }
 
 data "aws_ami" "ubuntu_secondary" {
@@ -225,20 +226,21 @@ data "aws_ami" "ubuntu_secondary" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"] # Canonical
+  owners   = ["099720109477"] # Canonical
   provider = aws.secondary
 }
 
 
 module "secondary_web" {
-  source = "./modules/ec2"
-  ami_id = data.aws_ami.ubuntu_secondary.id
-  instance_type = "t3.micro"
+  source            = "./modules/ec2"
+  ami_id            = data.aws_ami.ubuntu_secondary.id
+  instance_type     = "t3.micro"
   security_group_id = module.secondary_web_sg.security_group_id
-  key_name = aws_key_pair.secondary.key_name
-  subnet_id = module.secondary_vpc.public_subnet_ids[0]
+  key_name          = aws_key_pair.secondary.key_name
+  subnet_id         = module.secondary_vpc.public_subnet_ids[0]
+  user_data         = file("./cloud_init.sh")
   providers = {
     aws = aws.secondary
   }
-  
+
 }
