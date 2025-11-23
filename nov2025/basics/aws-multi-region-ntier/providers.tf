@@ -5,6 +5,13 @@ terraform {
       version = "6.21.0"
     }
   }
+  backend "s3" {
+    bucket = "qttfstatenov25"
+    key = "projects/muliregion/aws"
+    region = "us-west-2"
+    use_lockfile = true
+    
+  }
 }
 
 provider "aws" {
