@@ -207,6 +207,7 @@ module "primary_web" {
   key_name          = aws_key_pair.primary.key_name
   subnet_id         = module.primary_vpc.public_subnet_ids[0]
   user_data         = file("./cloud_init.sh")
+  build_id          = var.build_id
   providers = {
     aws = aws.primary
   }
@@ -239,6 +240,7 @@ module "secondary_web" {
   key_name          = aws_key_pair.secondary.key_name
   subnet_id         = module.secondary_vpc.public_subnet_ids[0]
   user_data         = file("./cloud_init.sh")
+  build_id          = var.build_id
   providers = {
     aws = aws.secondary
   }

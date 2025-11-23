@@ -30,3 +30,9 @@ variable "user_data" {
   nullable = true
 
 }
+
+variable "build_id" {
+  type = string
+  default = "1"
+  
+}

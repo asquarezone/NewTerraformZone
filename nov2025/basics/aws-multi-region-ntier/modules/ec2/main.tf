@@ -6,6 +6,13 @@ resource "aws_instance" "base" {
   vpc_security_group_ids      = [var.security_group_id]
   key_name                    = var.key_name
 
+  
+}
+
+resource "null_resource" "base" {
+  triggers = {
+    build_id = var.build_id
+  }
   provisioner "remote-exec" {
     connection {
       host = aws_instance.base.public_ip
@@ -15,8 +22,11 @@ resource "aws_instance" "base" {
     inline = [
       "sudo apt update",
       "sudo apt install apache2 -y",
-      "sudo apt install tree -y"
+      "sudo apt install tree php -y"
     ]
     
   }
+  depends_on = [ aws_instance.base ]
+
+  
 }
