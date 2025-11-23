@@ -17,10 +17,22 @@ terraform {
 provider "aws" {
   alias  = "primary"
   region = "us-west-2"
+  default_tags {
+    tags = {
+      Env = terraform.workspace
+    }
+    
+  }
 }
 
 provider "aws" {
   alias  = "secondary"
   region = "us-east-1"
+  default_tags {
+    tags = {
+      Env = terraform.workspace
+    }
+    
+  }
 
 }
