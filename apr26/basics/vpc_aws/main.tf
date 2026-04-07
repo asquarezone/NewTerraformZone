@@ -1,7 +1,6 @@
 resource "aws_vpc" "ntier" {
-  cidr_block = "10.0.0.0/24"
+  cidr_block = var.network_cidr
   tags = {
-    Name = "from-tf"
+    Name = var.network_name_tag
   }
-
 }
