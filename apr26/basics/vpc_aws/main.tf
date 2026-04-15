@@ -5,16 +5,51 @@ resource "aws_vpc" "ntier" {
   }
 }
 
-resource "aws_subnet" "subnets" {
+# route table
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.ntier.id
+  tags = {
+    Name = "private"
+  }
+
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.ntier.id
+  tags = {
+    Name = "public"
+  }
+
+}
+
+# internet gateway
+
+resource "aws_internet_gateway" "ntier" {
+  vpc_id = aws_vpc.ntier.id
+  tags = {
+    Name = "ntier-igw"
+  }
+
+}
+
+# connecting public route table to internet gateway
+resource "aws_route" "igw" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0" # anywhere
+  gateway_id             = aws_internet_gateway.ntier.id
+
+}
+
+resource "aws_subnet" "public_subnets" {
   # dynamic value and it becomes a dependency
   # this is referred as implicit dependency
-  count             = length(var.subnets)
+  count             = length(var.public_subnets)
   vpc_id            = aws_vpc.ntier.id
-  availability_zone = var.subnets[count.index].availability_zone
-  cidr_block        = var.subnets[count.index].cidr_block
+  availability_zone = var.public_subnets[count.index].availability_zone
+  cidr_block        = var.public_subnets[count.index].cidr_block
 
   tags = {
-    Name = var.subnets[count.index].name
+    Name = var.public_subnets[count.index].name
   }
   # explicit dependency
   depends_on = [
@@ -22,15 +57,31 @@ resource "aws_subnet" "subnets" {
   ]
 }
 
-# resource "aws_subnet" "two" {
-#   vpc_id            = aws_vpc.ntier.id # dynamic value
-#   availability_zone = var.subnet_two.availability_zone
-#   cidr_block        = var.subnet_two.cidr_block
+resource "aws_subnet" "private_subnets" {
+  # dynamic value and it becomes a dependency
+  # this is referred as implicit dependency
+  count             = length(var.private_subnets)
+  vpc_id            = aws_vpc.ntier.id
+  availability_zone = var.private_subnets[count.index].availability_zone
+  cidr_block        = var.private_subnets[count.index].cidr_block
 
-#   tags = {
-#     Name = var.subnet_two.name
-#   }
-#   depends_on = [
-#     aws_vpc.ntier
-#   ]
-# }
+  tags = {
+    Name = var.private_subnets[count.index].name
+  }
+  # explicit dependency
+  depends_on = [
+    aws_vpc.ntier
+  ]
+}
+
+resource "aws_route_table_association" "private" {
+  count          = length(var.private_subnets)
+  subnet_id      = aws_subnet.private_subnets[count.index].id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "public" {
+  count          = length(var.public_subnets)
+  subnet_id      = aws_subnet.public_subnets[count.index].id
+  route_table_id = aws_route_table.private.id
+}

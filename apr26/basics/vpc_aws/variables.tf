@@ -7,6 +7,7 @@ variable "region" {
 variable "network_cidr" {
   type        = string
   description = "network cidr range"
+  default     = "10.0.0.0/16"
 }
 
 variable "network_name_tag" {
@@ -15,7 +16,7 @@ variable "network_name_tag" {
   description = "name tag for vpc"
 }
 
-variable "subnets" {
+variable "private_subnets" {
   type = list(object({
     name              = string
     cidr_block        = string
@@ -24,12 +25,31 @@ variable "subnets" {
   default = [{
     availability_zone = "ap-south-1a"
     cidr_block        = "10.0.0.0/24"
-    name              = "one"
+    name              = "db-1"
     },
     {
       availability_zone = "ap-south-1b"
       cidr_block        = "10.0.1.0/24"
-      name              = "two"
+      name              = "db-2"
+  }]
+
+}
+
+variable "public_subnets" {
+  type = list(object({
+    name              = string
+    cidr_block        = string
+    availability_zone = string
+  }))
+  default = [{
+    availability_zone = "ap-south-1a"
+    cidr_block        = "10.0.2.0/24"
+    name              = "web-1"
+    },
+    {
+      availability_zone = "ap-south-1b"
+      cidr_block        = "10.0.3.0/24"
+      name              = "web-2"
   }]
 
 }
