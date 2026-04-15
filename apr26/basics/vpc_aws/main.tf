@@ -1,7 +1,7 @@
 resource "aws_vpc" "ntier" {
   cidr_block = var.network_cidr
   tags = {
-    Name = var.network_name_tag
+    Name = format("%s-%s-%s", local.organization, local.project, var.network_name_tag)
   }
 }
 
@@ -9,7 +9,7 @@ resource "aws_vpc" "ntier" {
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.ntier.id
   tags = {
-    Name = "private"
+    Name = format("%s-%s-private", local.organization, local.project)
   }
 
 }
@@ -17,7 +17,7 @@ resource "aws_route_table" "private" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.ntier.id
   tags = {
-    Name = "public"
+    Name = format("%s-%s-public", local.organization, local.project)
   }
 
 }
@@ -27,7 +27,7 @@ resource "aws_route_table" "public" {
 resource "aws_internet_gateway" "ntier" {
   vpc_id = aws_vpc.ntier.id
   tags = {
-    Name = "ntier-igw"
+    Name = format("%s-%s-igw", local.organization, local.project)
   }
 
 }
@@ -35,7 +35,7 @@ resource "aws_internet_gateway" "ntier" {
 # connecting public route table to internet gateway
 resource "aws_route" "igw" {
   route_table_id         = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0" # anywhere
+  destination_cidr_block = local.anywhere # anywhere
   gateway_id             = aws_internet_gateway.ntier.id
 
 }
@@ -49,7 +49,7 @@ resource "aws_subnet" "public_subnets" {
   cidr_block        = var.public_subnets[count.index].cidr_block
 
   tags = {
-    Name = var.public_subnets[count.index].name
+    Name = format("%s-%s-%s", local.organization, local.project, var.public_subnets[count.index].name)
   }
   # explicit dependency
   depends_on = [
@@ -66,7 +66,7 @@ resource "aws_subnet" "private_subnets" {
   cidr_block        = var.private_subnets[count.index].cidr_block
 
   tags = {
-    Name = var.private_subnets[count.index].name
+    Name = format("%s-%s-%s", local.organization, local.project, var.private_subnets[count.index].name)
   }
   # explicit dependency
   depends_on = [
