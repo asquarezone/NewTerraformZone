@@ -19,3 +19,27 @@ variable "subnets" {
     is_public_subnet = bool
   }))
 }
+
+variable "nic_name" {
+  type = string
+}
+
+variable "nsg_name" {
+  type = string
+}
+
+variable "http_rule" {
+  type = object({
+    name             = string
+    priority         = number
+    destination_port = string
+  })
+}
+
+variable "ssh_rule" {
+  type = object({
+    name             = string
+    priority         = number
+    destination_port = string
+  })
+}

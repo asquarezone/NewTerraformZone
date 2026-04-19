@@ -28,11 +28,11 @@ resource "azurerm_public_ip" "web" {
 
 # network interface
 resource "azurerm_network_interface" "web" {
-  name                = "web"
+  name                = var.nic_name
   resource_group_name = azurerm_resource_group.base.name
   location            = azurerm_resource_group.base.location
   ip_configuration {
-    name                          = "web"
+    name                          = var.nic_name
     subnet_id                     = azurerm_subnet.subnets[0].id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.web.id
@@ -42,28 +42,29 @@ resource "azurerm_network_interface" "web" {
 
 # network security group
 resource "azurerm_network_security_group" "web" {
-  name                = "web-nsg"
+  name                = var.nsg_name
   resource_group_name = azurerm_resource_group.base.name
   location            = azurerm_resource_group.base.location
+
   security_rule {
-    name                       = "openhttp"
-    priority                   = 100
+    name                       = var.http_rule.name
+    priority                   = var.http_rule.priority
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "80"
+    destination_port_range     = var.http_rule.destination_port
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
   security_rule {
-    name                       = "openssh"
-    priority                   = 120
+    name                       = var.ssh_rule.name
+    priority                   = var.ssh_rule.priority
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "22"
+    destination_port_range     = var.ssh_rule.destination_port
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
