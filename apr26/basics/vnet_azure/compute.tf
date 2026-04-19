@@ -1,25 +1,23 @@
 resource "azurerm_linux_virtual_machine" "web" {
-  name                  = "web-1"
+  name                  = var.vm_name
   resource_group_name   = azurerm_resource_group.base.name
   location              = azurerm_resource_group.base.location
   network_interface_ids = [azurerm_network_interface.web.id]
 
-  size           = "Standard_B1s"
-  admin_username = "Dell"
+  size           = var.vm_size
+  admin_username = var.admin_username
   admin_ssh_key {
-    username   = "Dell"
-    public_key = file("~/.ssh/id_ed25519.pub")
+    username   = var.admin_username
+    public_key = file(var.ssh_public_key_path)
   }
-  # source image reference for ubuntu 24.04
   source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
-    version   = "latest"
+    publisher = var.vm_image.publisher
+    offer     = var.vm_image.offer
+    sku       = var.vm_image.sku
+    version   = var.vm_image.version
   }
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
-
 }
