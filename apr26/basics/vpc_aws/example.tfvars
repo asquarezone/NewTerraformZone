@@ -40,19 +40,28 @@ web_security_group = {
     from_port   = 80
     to_port     = 80
     ip_protocol = "tcp"
-    cidr_ipv4  = "0.0.0.0/0"
+    cidr_ipv4   = "0.0.0.0/0"
 
     }, {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr_ipv4  = "0.0.0.0/0"
+    cidr_ipv4   = "0.0.0.0/0"
 
     }, {
     from_port   = 443
     to_port     = 443
     ip_protocol = "tcp"
-    cidr_ipv4  = "0.0.0.0/0"
+    cidr_ipv4   = "0.0.0.0/0"
 
   }]
+}
+
+key_pair_info = {
+  key_pair_name = "private"
+}
+
+web_server_info = {
+  instance_type = "t3.micro"
+  ami_id        = "ami-05d2d839d4f73aafb"
 }

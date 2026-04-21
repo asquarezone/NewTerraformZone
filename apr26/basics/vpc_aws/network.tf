@@ -108,9 +108,9 @@ resource "aws_vpc_security_group_ingress_rule" "web" {
 # all traffic egress rule
 resource "aws_vpc_security_group_egress_rule" "web" {
   cidr_ipv4         = local.anywhere
-  from_port         = 0
+  from_port         = -1
   ip_protocol       = "-1"
   security_group_id = aws_security_group.web.id
-  to_port           = 0
+  to_port           = -1
 }
 

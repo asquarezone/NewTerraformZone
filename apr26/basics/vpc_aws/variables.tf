@@ -93,3 +93,19 @@ variable "web_security_group" {
   })
 
 }
+
+variable "key_pair_info" {
+  type = object({
+    key_pair_name   = string
+    public_key_path = optional(string, "~/.ssh/id_ed25519.pub")
+  })
+
+}
+
+variable "web_server_info" {
+  type = object({
+    instance_type = string
+    ami_id        = string
+  })
+
+}
