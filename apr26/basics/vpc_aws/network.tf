@@ -114,3 +114,9 @@ resource "aws_vpc_security_group_egress_rule" "web" {
   to_port           = -1
 }
 
+# default vpc id
+
+data "aws_vpc" "default" {
+  default = true
+}
+
