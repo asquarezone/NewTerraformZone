@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 module "security_group" {
-    source = "./modules/security_group"
+    source = "git::https://github.com/asquarezone/TerraformModules.git//aws/securitygroupv2"
     vpc_id = "vpc-0848da751eeb80da2"
     web_security_group = {
         name = "webtf"
